@@ -7,9 +7,9 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+## Job Board API
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+This is a Laravel-based API for managing job listings with advanced filtering capabilities. It supports two types of filtering: AND-based filtering (all filters must match) and OR-based filtering (any filter can match).
 
 - [Simple, fast routing engine](https://laravel.com/docs/routing).
 - [Powerful dependency injection container](https://laravel.com/docs/container).
@@ -21,46 +21,188 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+## Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Job Management:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+    - Create, read, update, and delete job listings.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+    - Each job has attributes like title, description, company_name, salary_min, salary_max, is_remote, job_type, status, and published_at.
 
-## Laravel Sponsors
+Advanced Filtering:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+    Filter jobs by:
+    
+        Job Type: full-time, part-time, contract, freelance.
 
-### Premium Partners
+        Salary Range: Filter by minimum and maximum salary.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+        Languages: Filter by required programming languages.
 
-## Contributing
+        Locations: Filter by job locations.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+        Categories: Filter by job categories.
 
-## Code of Conduct
+        Dynamic Attributes: Filter by custom attributes using the Entity-Attribute-Value (EAV) pattern.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Two Filtering Modes:
 
-## Security Vulnerabilities
+    All Filters: Jobs must match all the specified filters (AND logic).
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    Any Filter: Jobs must match any of the specified filters (OR logic).
 
+## Installation
+
+1. Clone the Repository
+    git clone https://github.com/your-username/job-board.git
+    cd job-board
+
+2. Install Dependencies   
+    composer install
+
+3. Set Up the Environment    
+    - cp .env.example .env  
+    - Update the .env file with your database credentials:
+        DB_CONNECTION=mysql
+        DB_HOST=127.0.0.1
+        DB_PORT=3306
+        DB_DATABASE=job_board
+        DB_USERNAME=root
+        DB_PASSWORD=  
+
+4. Generate Application Key
+    php artisan key:generate
+
+5. Run Migrations
+    php artisan migrate
+
+6. Seed the Database
+    php artisan db:seed
+
+7. Start the Development Server
+    php artisan serve
+
+The API will be available at http://127.0.0.1:8000        
+
+### API Endpoints
+
+Get All Jobs
+    URL: /api/jobs
+
+    Method: GET
+
+    Description: Retrieve a list of jobs with optional filtering.
+
+    Query Parameters:
+
+    filter[job_type]: Filter by job type (e.g., full-time, part-time).
+
+    filter[salary]: Filter by salary range (e.g., 4000).
+
+    filter[languages][]: Filter by programming languages (e.g., PHP, JavaScript).
+
+    filter[locations][]: Filter by locations (e.g., New York, Remote).
+
+    filter[categories][]: Filter by categories (e.g., Web Development).
+
+    filter[attributes][attribute_name]: Filter by dynamic attributes (e.g., years_experience=3).
+
+    filter_mode: Choose between all (AND logic) or any (OR logic). Default is any.
+
+    per_page: Number of items per page (e.g., 10). Default is 10.
+
+Example Requests
+    1- Filter by All:    
+        GET /api/jobs?filter[job_type]=part-time&filter[salary]=4000&filter[languages][]=PHP&filter[languages][]=JavaScript&filter[locations][]=Remote&filter[attributes][years_experience]=3&filter[locations][]=San Francisco
+    2- Filter by Locations or Categories (OR Logic):
+        GET /api/jobs?filter[locations][]=New York&filter[locations][]=Remote&filter[categories][]=Web Development&filter_mode=any    
+    3- Filter by Salary and Dynamic Attribute:
+        GET /api/jobs?filter[salary]=5000&filter[attributes][years_experience]=3
+
+
+## Filtering Modes
+
+1. All Filters (AND Logic)
+    Jobs must match all the specified filters. Use filter_mode=all in the query parameters.
+
+    Example:
+    GET /api/jobs?filter[job_type]=full-time&filter[languages][]=PHP&filter_mode=all
+    This will return jobs that:
+
+    Have a job_type of full-time AND
+
+    Require PHP as a language.
+        
+
+2. Any Filter (OR Logic) 
+Jobs must match any of the specified filters. Use filter_mode=any in the query parameters (default).
+
+        Example:
+        GET /api/jobs?filter[job_type]=part-time&filter[languages][]=JavaScript&filter_mode=any
+        
+        This will return jobs that:
+
+        Have a job_type of part-time OR
+
+        Require JavaScript as a language. 
+
+## Database Schema
+Tables
+1. jobs:
+
+    id, title, description, company_name, salary_min, salary_max, is_remote, job_type, status, published_at, created_at, updated_at.
+
+2. languages:
+
+    id, name.
+
+3. locations:
+
+    id, city, state, country.
+
+4. categories:
+
+    id, name.
+
+5. attributes:
+
+    id, name, type, options.
+
+6. job_attribute_values:
+
+    id, job_id, attribute_id, value.
+
+7. Pivot Tables:
+
+    job_language, job_location, job_category.
+
+
+## Seeded Data
+
+The database seeder creates the following sample data:
+
+Jobs: 3 sample job listings.
+
+Languages: PHP, JavaScript, Python, Java.
+
+Locations: New York, San Francisco, Remote.
+
+Categories: Web Development, Mobile Development, Data Science.
+
+Attributes: years_experience, education_level, is_urgent.
+## Testing
+
+You can test the API using tools like Postman
+Example Requests
+1. Get All Jobs:
+    GET http://127.0.0.1:8000/api/jobs
+2. Filter by Job Type and Languages:
+    GET http://127.0.0.1:8000/api/jobs?filter[job_type]=full-time&filter[languages][]=PHP&filter[languages][]=JavaScript
+3. Filter by Locations or Categories:
+    GET http://127.0.0.1:8000/api/jobs?filter[locations][]=New York&filter[locations][]=Remote&filter[categories][]=Web Development&filter_mode=any        
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-source and available under the MIT License.
+## Contact
+
+For questions or feedback, please contact [Ismail] at [ismail.bery@gmail.com].
